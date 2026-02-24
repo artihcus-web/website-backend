@@ -1,3 +1,7 @@
 node_modules
 .env
 *.log
+
+# SSH keys for CI/CD - never commit
+deploy_key
+deploy_key.pub
