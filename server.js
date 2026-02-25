@@ -53,7 +53,7 @@ const sendEmail = async (mailOptions) => {
 // Career form endpoint
 app.post("/send-email/career", upload.single("resume"), async (req, res) => {
   try {
-    const { name, email, phone } = req.body;
+    const { name, email, phone, jobTitle } = req.body;
     const resume = req.file;
 
     // Validate required fields
@@ -61,13 +61,15 @@ app.post("/send-email/career", upload.single("resume"), async (req, res) => {
       return res.status(400).json({ error: "All fields (name, email, phone, resume) are required." });
     }
 
+    const positionLine = jobTitle ? `Position applied for: ${jobTitle}\n\n` : "";
+
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: "info@artihcus.com",
-      subject: "New Career Application - Artihcus Global",
+      subject: jobTitle ? `Career Application: ${jobTitle} - Artihcus Global` : "New Career Application - Artihcus Global",
       text: `
         New Career Application Details:
-        Name: ${name}
+        ${positionLine}Name: ${name}
         Email: ${email}
         Phone: ${phone}
       `,

@@ -168,6 +168,34 @@ Deploy the `frontend/build` folder to your web server. The site will call `http:
 
 ---
 
+## Nginx: proxy /api to backend (no 404)
+
+Backend expects paths like `/api/events`, `/api/news`, `/api/blogs`. Nginx must **not** strip `/api` when proxying.
+
+In `/etc/nginx/sites-available/artihcus.conf`, the `location /api/` block must use **no trailing slash** on `proxy_pass`:
+
+```nginx
+location /api/ {
+    proxy_pass http://127.0.0.1:5001;   # no trailing slash – forwards /api/events as-is
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}
+
+# Serve uploaded images from the backend
+location /uploads/ {
+    proxy_pass http://127.0.0.1:5001;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+}
+```
+
+If you had `proxy_pass http://127.0.0.1:5001/;` (with slash), Nginx strips `/api` and the backend gets `/events` → 404. Fix: remove the trailing slash, then `sudo nginx -t && sudo systemctl reload nginx`.
+
+---
+
 ## If MongoDB password has `@`
 
 In `MONGODB_URI`, encode `@` in the password as `%40`.  
